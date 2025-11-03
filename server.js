@@ -5,7 +5,19 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(express.static(".")); // 让 index.html 可直接访问
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 让 Express 返回 index.html
+app.use(express.static(__dirname));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 
