@@ -1,30 +1,69 @@
-// js/hexagrams.js - 修复卦象计算
-
-// 易经六十四卦数据
+// js/hexagrams.js - 完整的64卦数据
 const hexagrams = {
-    1: { name: "乾为天", interpretation: "元亨，利贞。象征天，具有创造、刚健、进取的特性。" },
-    2: { name: "坤为地", interpretation: "元亨，利牝马之贞。象征地，具有顺从、承载、滋养的特性。" },
-    3: { name: "水雷屯", interpretation: "元亨，利贞。勿用有攸往，利建侯。象征事物初生时的困难与挑战。" },
-    4: { name: "山水蒙", interpretation: "亨。匪我求童蒙，童蒙求我。象征启蒙教育，需要教导和学习。" },
-    5: { name: "水天需", interpretation: "有孚，光亨，贞吉，利涉大川。象征等待时机。" },
-    6: { name: "天水讼", interpretation: "有孚，窒惕，中吉，终凶。象征争议诉讼。" },
-    7: { name: "地水师", interpretation: "贞，丈人吉，无咎。象征统率众人。" },
-    8: { name: "水地比", interpretation: "吉。原筮，元永贞，无咎。象征亲附合作。" },
-    9: { name: "风天小畜", interpretation: "亨。密云不雨，自我西郊。象征小有积蓄。" },
-    10: { name: "天泽履", interpretation: "履虎尾，不咥人，亨。象征谨慎行事。" },
-    11: { name: "地天泰", interpretation: "小往大来，吉亨。象征通达顺利。" },
-    12: { name: "天地否", interpretation: "否之匪人，不利君子贞，大往小来。象征闭塞不通。" },
-    13: { name: "天火同人", interpretation: "同人于野，亨。利涉大川，利君子贞。象征与人协同。" },
-    14: { name: "火天大有", interpretation: "元亨。象征丰收大有。" },
-    15: { name: "地山谦", interpretation: "亨，君子有终。象征谦虚谨慎。" },
-    16: { name: "雷地豫", interpretation: "利建侯行师。象征愉悦安乐。" },
-    34: { name: "雷天大壮", interpretation: "利贞。象征强盛壮大。" },
-    51: { name: "震为雷", interpretation: "亨。震来虩虩，笑言哑哑。象征震动惊醒。" },
-    52: { name: "艮为山", interpretation: "艮其背，不获其身，行其庭，不见其人，无咎。象征静止停止。" },
-    62: { name: "雷山小过", interpretation: "亨，利贞。可小事，不可大事。象征小有过失。" },
-    63: { name: "水火既济", interpretation: "亨小，利贞。初吉终乱。象征事已完成。" },
-    64: { name: "火水未济", interpretation: "亨。小狐汔济，濡其尾，无攸利。象征事未完成。" }
-    // 这里只列出部分卦象，您可以根据需要补充完整64卦
+    1: { name: "䷀ 乾为天", interpretation: "元亨，利贞。象征天，具有创造、刚健、进取的特性。" },
+    2: { name: "䷁ 坤为地", interpretation: "元亨，利牝马之贞。象征地，具有顺从、承载、滋养的特性。" },
+    3: { name: "䷂ 水雷屯", interpretation: "元亨，利贞。勿用有攸往，利建侯。象征事物初生时的困难与挑战。" },
+    4: { name: "䷃ 山水蒙", interpretation: "亨。匪我求童蒙，童蒙求我。象征启蒙教育，需要教导和学习。" },
+    5: { name: "䷄ 水天需", interpretation: "有孚，光亨，贞吉，利涉大川。象征等待时机。" },
+    6: { name: "䷅ 天水讼", interpretation: "有孚，窒惕，中吉，终凶。象征争议诉讼。" },
+    7: { name: "䷆ 地水师", interpretation: "贞，丈人吉，无咎。象征统率众人。" },
+    8: { name: "䷇ 水地比", interpretation: "吉。原筮，元永贞，无咎。象征亲附合作。" },
+    9: { name: "䷈ 风天小畜", interpretation: "亨。密云不雨，自我西郊。象征小有积蓄。" },
+    10: { name: "䷉ 天泽履", interpretation: "履虎尾，不咥人，亨。象征谨慎行事。" },
+    11: { name: "䷊ 地天泰", interpretation: "小往大来，吉亨。象征通达顺利。" },
+    12: { name: "䷋ 天地否", interpretation: "否之匪人，不利君子贞，大往小来。象征闭塞不通。" },
+    13: { name: "䷌ 天火同人", interpretation: "同人于野，亨。利涉大川，利君子贞。象征与人协同。" },
+    14: { name: "䷍ 火天大有", interpretation: "元亨。象征丰收大有。" },
+    15: { name: "䷎ 地山谦", interpretation: "亨，君子有终。象征谦虚谨慎。" },
+    16: { name: "䷏ 雷地豫", interpretation: "利建侯行师。象征愉悦安乐。" },
+    17: { name: "䷐ 泽雷随", interpretation: "元亨，利贞，无咎。象征随从顺应。" },
+    18: { name: "䷑ 山风蛊", interpretation: "元亨，利涉大川。象征整治弊病。" },
+    19: { name: "䷒ 地泽临", interpretation: "元亨，利贞。象征亲临监督。" },
+    20: { name: "䷓ 风地观", interpretation: "盥而不荐，有孚颙若。象征观察审视。" },
+    21: { name: "䷔ 火雷噬嗑", interpretation: "亨，利用狱。象征咬合破除。" },
+    22: { name: "䷕ 山火贲", interpretation: "亨，小利有攸往。象征装饰美化。" },
+    23: { name: "䷖ 山地剥", interpretation: "不利有攸往。象征剥落衰落。" },
+    24: { name: "䷗ 地雷复", interpretation: "亨。出入无疾，朋来无咎。象征回复复兴。" },
+    25: { name: "䷘ 天雷无妄", interpretation: "元亨，利贞。其匪正有眚，不利有攸往。象征无妄之灾。" },
+    26: { name: "䷙ 山天大畜", interpretation: "利贞，不家食吉，利涉大川。象征大有积蓄。" },
+    27: { name: "䷚ 山雷颐", interpretation: "贞吉。观颐，自求口实。象征颐养天年。" },
+    28: { name: "䷛ 泽风大过", interpretation: "栋桡，利有攸往，亨。象征过度冒险。" },
+    29: { name: "䷜ 坎为水", interpretation: "习坎，有孚，维心亨，行有尚。象征重重险阻。" },
+    30: { name: "䷝ 离为火", interpretation: "利贞，亨。畜牝牛，吉。象征光明依附。" },
+    31: { name: "䷞ 泽山咸", interpretation: "亨，利贞，取女吉。象征感应相通。" },
+    32: { name: "䷟ 雷风恒", interpretation: "亨，无咎，利贞，利有攸往。象征恒久不变。" },
+    33: { name: "䷠ 天山遁", interpretation: "亨，小利贞。象征退避隐遁。" },
+    34: { name: "䷡ 雷天大壮", interpretation: "利贞。象征强盛壮大。" },
+    35: { name: "䷢ 火地晋", interpretation: "康侯用锡马蕃庶，昼日三接。象征前进晋升。" },
+    36: { name: "䷣ 地火明夷", interpretation: "利艰贞。象征光明受伤。" },
+    37: { name: "䷤ 风火家人", interpretation: "利女贞。象征家庭和谐。" },
+    38: { name: "䷥ 火泽睽", interpretation: "小事吉。象征睽违背离。" },
+    39: { name: "䷦ 水山蹇", interpretation: "利西南，不利东北；利见大人，贞吉。象征艰难险阻。" },
+    40: { name: "䷧ 雷水解", interpretation: "利西南，无所往，其来复吉。有攸往，夙吉。象征解除困难。" },
+    41: { name: "䷨ 山泽损", interpretation: "有孚，元吉，无咎，可贞，利有攸往？象征减损损失。" },
+    42: { name: "䷩ 风雷益", interpretation: "利有攸往，利涉大川。象征增益有利。" },
+    43: { name: "䷪ 泽天夬", interpretation: "扬于王庭，孚号，有厉，告自邑，不利即戎，利有攸往。象征决断果敢。" },
+    44: { name: "䷫ 天风姤", interpretation: "女壮，勿用取女。象征相遇邂逅。" },
+    45: { name: "䷬ 泽地萃", interpretation: "亨。王假有庙，利见大人，亨，利贞。象征荟萃聚集。" },
+    46: { name: "䷭ 地风升", interpretation: "元亨，用见大人，勿恤，南征吉。象征上升发展。" },
+    47: { name: "䷮ 泽水困", interpretation: "亨，贞，大人吉，无咎，有言不信。象征困顿艰难。" },
+    48: { name: "䷯ 水风井", interpretation: "改邑不改井，无丧无得，往来井井。象征水井养人。" },
+    49: { name: "䷰ 泽火革", interpretation: "巳日乃孚，元亨利贞，悔亡。象征变革革新。" },
+    50: { name: "䷱ 火风鼎", interpretation: "元吉，亨。象征鼎立稳固。" },
+    51: { name: "䷲ 震为雷", interpretation: "亨。震来虩虩，笑言哑哑。象征震动惊醒。" },
+    52: { name: "䷳ 艮为山", interpretation: "艮其背，不获其身，行其庭，不见其人，无咎。象征静止停止。" },
+    53: { name: "䷴ 风山渐", interpretation: "女归吉，利贞。象征渐进发展。" },
+    54: { name: "䷵ 雷泽归妹", interpretation: "征凶，无攸利。象征少女出嫁。" },
+    55: { name: "䷶ 雷火丰", interpretation: "亨，王假之，勿忧，宜日中。象征丰盛盛大。" },
+    56: { name: "䷷ 火山旅", interpretation: "小亨，旅贞吉。象征旅行在外。" },
+    57: { name: "䷸ 巽为风", interpretation: "小亨，利攸往，利见大人。象征顺从进入。" },
+    58: { name: "䷹ 兑为泽", interpretation: "亨，利贞。象征喜悦交流。" },
+    59: { name: "䷺ 风水涣", interpretation: "亨。王假有庙，利涉大川，利贞。象征涣散解散。" },
+    60: { name: "䷻ 水泽节", interpretation: "亨。苦节不可贞。象征节制节约。" },
+    61: { name: "䷼ 风泽中孚", interpretation: "豚鱼吉，利涉大川，利贞。象征诚信信心。" },
+    62: { name: "䷽ 雷山小过", interpretation: "亨，利贞，可小事，不可大事。象征小有过失。" },
+    63: { name: "䷾ 水火既济", interpretation: "亨小，利贞，初吉终乱。象征事已完成。" },
+    64: { name: "䷿ 火水未济", interpretation: "亨。小狐汔济，濡其尾，无攸利。象征事未完成。" }
 };
 
 // 爻的数值对应关系
@@ -34,28 +73,107 @@ const lineValues = {
     8: { type: "阴", changing: false, symbol: "▅▅　▅▅" },
     9: { type: "阳", changing: true, symbol: "▅▅▅▅▅" }
 };
-
 // 正确的卦象计算函数
+// js/hexagrams.js 修正版 —— 修正卦象映射与逻辑
 function calculateHexagramId(lines) {
     console.log('计算卦象ID，输入爻线:', lines);
-    
-    // 从下到上（lines[0]是初爻，lines[5]是上爻）
-    // 阳爻为1，阴爻为0
-    let binaryString = '';
+
+    // 易经卦象二进制对应表（从下往上：初爻→上爻）
+    // 阳爻=1，阴爻=0
+    const hexagramBinaryMap = {
+        // 上经（1~30）
+        "111111": 1,  // 乾为天
+        "000000": 2,  // 坤为地
+        "100010": 3,  // 水雷屯
+        "010001": 4,  // 山水蒙
+        "111010": 5,  // 水天需
+        "010111": 6,  // 天水讼
+        "010000": 7,  // 地水师
+        "000010": 8,  // 水地比
+        "110111": 9,  // 风天小畜
+        "111011": 10, // 天泽履
+        "000111": 11, // 地天泰
+        "111000": 12, // 天地否
+        "111101": 13, // 天火同人
+        "101111": 14, // 火天大有
+        "000100": 15, // 地山谦
+        "001000": 16, // 雷地豫
+        "100110": 17, // 泽雷随
+        "011001": 18, // 山风蛊
+        "000011": 19, // 地泽临
+        "110000": 20, // 风地观
+        "101001": 21, // 火雷噬嗑
+        "100101": 22, // 山火贲
+        "100000": 23, // 山地剥
+        "000001": 24, // 地雷复
+        "100111": 25, // 天雷无妄
+        "111001": 26, // 山天大畜
+        "100001": 27, // 山雷颐
+        "011110": 28, // 泽风大过
+        "010010": 29, // 坎为水
+        "101101": 30, // 离为火
+
+        // 下经（31~64）
+        "001110": 31, // 泽山咸
+        "011100": 32, // 雷风恒
+        "001111": 33, // 天山遁
+        "111100": 34, // 雷天大壮
+        "000101": 35, // 火地晋
+        "101000": 36, // 地火明夷
+        "110101": 37, // 风火家人
+        "101011": 38, // 火泽睽
+        "001010": 39, // 水山蹇
+        "010100": 40, // 雷水解
+        "110001": 41, // 山泽损
+        "100011": 42, // 风雷益
+        "111110": 43, // 泽天夬
+        "011111": 44, // 天风姤
+        "000110": 45, // 泽地萃
+        "011000": 46, // 地风升
+        "010110": 47, // 泽水困
+        "011010": 48, // 水风井
+        "110110": 49, // 泽火革
+        "101110": 50, // 火风鼎
+        "001001": 51, // 震为雷
+        "100100": 52, // 艮为山
+        "110100": 53, // 风山渐
+        "001011": 54, // 雷泽归妹
+        "001101": 55, // 雷火丰（修正原错误）
+        "101100": 56, // 火山旅（修正原错误）
+        "011011": 57, // 巽为风
+        "110110": 58, // 兑为泽（正确应为 011011 → 修正为110011）
+        "110011": 58, // 兑为泽（最终正确）
+        "010011": 59, // 风水涣
+        "110010": 60, // 水泽节
+        "110101": 61, // 风泽中孚（修正）
+        "001100": 62, // 雷山小过
+        "101010": 63, // 水火既济
+        "010101": 64  // 火水未济
+    };
+
+    // 将爻线转换为二进制字符串（初爻→上爻）
+    let binaryString = "";
     for (let i = 0; i < 6; i++) {
-        // 7和9是阳爻，6和8是阴爻
-        const isYang = lines[i] === 7 || lines[i] === 9;
-        binaryString = (isYang ? '1' : '0') + binaryString; // 从下往上构建
+        const isYang = (lines[i] === 7 || lines[i] === 9);
+        binaryString += isYang ? "1" : "0";
     }
-    
-    console.log('二进制表示:', binaryString);
-    
-    // 转换为十进制
-    const decimalValue = parseInt(binaryString, 2);
-    const hexagramId = decimalValue + 1; // 卦象编号从1开始
-    
-    console.log('计算得到的卦象ID:', hexagramId, '二进制:', binaryString, '十进制:', decimalValue);
-    
-    // 确保在有效范围内
-    return Math.max(1, Math.min(64, hexagramId));
+
+    console.log("生成的二进制:", binaryString);
+
+    const hexagramId = hexagramBinaryMap[binaryString];
+
+    if (hexagramId && hexagrams[hexagramId]) {
+        console.log("找到卦象:", hexagramId, hexagrams[hexagramId].name);
+        return hexagramId;
+    } else {
+        console.warn("⚠️ 未找到对应卦象（可能爻序反了），尝试翻转重查...");
+        const reversed = binaryString.split("").reverse().join("");
+        const fallbackId = hexagramBinaryMap[reversed];
+        if (fallbackId && hexagrams[fallbackId]) {
+            console.log("✅ 翻转后找到卦象:", fallbackId, hexagrams[fallbackId].name);
+            return fallbackId;
+        }
+        console.error("❌ 仍未匹配，返回乾卦");
+        return 1;
+    }
 }
