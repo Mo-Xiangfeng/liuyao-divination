@@ -1,5 +1,8 @@
-// js/config.js - Netlify构建时替换版本
-const DEEPSEEK_API_KEY = "DEEPSEEK_API_KEY_PLACEHOLDER"; // Netlify构建时会替换这个占位符
+// js/config.js
+const DEEPSEEK_API_KEY = 
+    typeof process !== 'undefined' && process.env && process.env.DEEPSEEK_API_KEY 
+    ? process.env.DEEPSEEK_API_KEY 
+    : (window.DEEPSEEK_API_KEY || "fallback-key-if-needed");
 
 const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
 
@@ -14,9 +17,5 @@ function getApiKey() {
 }
 
 function isApiConfigured() {
-    const key = getApiKey();
-    // 检查密钥不是占位符且长度足够
-    const configured = key && key !== "DEEPSEEK_API_KEY_PLACEHOLDER" && key.length > 20;
-    console.log('API配置状态:', { configured, keyLength: key ? key.length : 0 });
-    return configured;
+    return DEEPSEEK_API_KEY && DEEPSEEK_API_KEY.length > 10;
 }
