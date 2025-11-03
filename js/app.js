@@ -1,4 +1,4 @@
-// 主应用逻辑
+// js/app.js - 修复版本
 
 // 存储历史记录
 let divinationHistory = JSON.parse(localStorage.getItem('divinationHistory')) || [];
@@ -12,108 +12,91 @@ const historyList = document.getElementById('historyList');
 
 // 初始化
 function init() {
-    // 检查API配置状态
-    checkApiStatus();
+    console.log('=== 六爻卜卦网站初始化 ===');
+    
+    // 显示API状态
+    showApiStatus();
     
     // 初始化显示历史记录
     displayHistory();
     
     // 绑定事件监听器
     bindEventListeners();
+    
+    // 添加API测试功能
+    addApiTestFeature();
 }
 
-// 检查API状态
-function checkApiStatus() {
-    if (!isApiConfigured()) {
-        console.warn('DeepSeek API密钥未配置，将使用基础解读功能');
-        // 可以在控制台显示提示，但不对用户显示
-    } else {
-        console.log('DeepSeek API已配置，智能解读功能可用');
+// 显示API状态
+function showApiStatus() {
+    const status = isApiConfigured() ? '✅ 已配置' : '❌ 未配置';
+    console.log('DeepSeek API状态:', status);
+}
+
+// 添加API测试功能
+function addApiTestFeature() {
+    // 在按钮组旁边添加测试按钮
+    const testBtn = document.createElement('button');
+    testBtn.textContent = '测试API连接';
+    testBtn.className = 'secondary-btn';
+    testBtn.onclick = testApiConnection;
+    
+    const buttonGroup = document.querySelector('.button-group');
+    if (buttonGroup) {
+        buttonGroup.appendChild(testBtn);
     }
 }
-// 调用DeepSeek API
-async function callDeepSeekAPI(hexagram, lines) {
-    if (!isApiConfigured()) {
-        throw new Error('API未配置');
-    }
 
-    // 构建请求数据
-    const requestData = {
-        model: API_CONFIG.model,
-        messages: [
-            {
-                role: "system",
-                content: `你是一位精通易经六爻卜卦的专家，请根据用户提供的卦象进行专业、详细且积极的解读。
-                请遵循以下解读原则：
-                1. 保持专业性和准确性
-                2. 提供积极正向的引导
-                3. 从多个角度进行详细分析
-                4. 语言通俗易懂但保持专业感
-                5. 给出实用的建议和指引`
+// 测试API连接
+async function testApiConnection() {
+    console.log('开始测试API连接...');
+    
+    if (!isApiConfigured()) {
+        alert('❌ API未配置，请检查环境变量设置');
+        return;
+    }
+    
+    const apiKey = getApiKey();
+    console.log('测试使用的API密钥长度:', apiKey.length);
+    
+    try {
+        const response = await fetch(DEEPSEEK_CONFIG.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
             },
-            {
-                role: "user",
-                content: `请为我解读以下六爻卦象：
-                卦名：${hexagram.name}
-                基础卦辞：${hexagram.interpretation}
-                六爻数值：${lines.join(', ')}
-                爻象详情：${lines.map((line, index) => {
-                    const positionNames = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
-                    return `${positionNames[index]}：${lineValues[line].type}爻${lineValues[line].changing ? '（变爻）' : ''}`;
-                }).join('；')}
-                
-                请从以下几个方面进行详细解读：
-                1. 整体运势和卦象核心含义
-                2. 对事业/工作的具体启示
-                3. 对感情/人际关系的影响  
-                4. 健康方面的注意事项
-                5. 变爻的特殊含义和影响（如果有变爻）
-                6. 综合建议和行动指引
-                7. 近期需要注意的事项
-                
-                请用专业但亲切的语言进行解读，保持积极正向的引导，给出实用的建议。`
-            }
-        ],
-        temperature: API_CONFIG.temperature,
-        max_tokens: API_CONFIG.max_tokens
-    };
-    
-    console.log('发送API请求:', { 
-        url: DEEPSEEK_API_URL,
-        keyLength: getApiKey().length 
-    });
-    
-    // 发送请求到DeepSeek API
-    const response = await fetch(DEEPSEEK_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getApiKey()}`
-        },
-        body: JSON.stringify(requestData)
-    });
-    
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API响应错误:', response.status, errorText);
-        throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
+            body: JSON.stringify({
+                model: DEEPSEEK_CONFIG.modelConfig.model,
+                messages: [
+                    {
+                        role: "user",
+                        content: "请回复'连接成功'测试API连接"
+                    }
+                ],
+                max_tokens: 10,
+                temperature: 0.1
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            alert('✅ API连接测试成功！');
+            console.log('API测试成功:', data);
+        } else {
+            const errorText = await response.text();
+            console.error('API测试失败:', response.status, errorText);
+            alert(`❌ API连接失败: ${response.status}\n请检查API密钥是否正确`);
+        }
+    } catch (error) {
+        console.error('API测试异常:', error);
+        alert('❌ 网络连接失败，请检查网络设置');
     }
-    
-    const data = await response.json();
-    console.log('API响应数据:', data);
-    
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error('API返回数据格式错误');
-    }
-    
-    return data.choices[0].message.content;
 }
+
 // 绑定事件监听器
 function bindEventListeners() {
-    // 开始占卜
     startBtn.addEventListener('click', performDivination);
-    
-    // 清除记录
     clearBtn.addEventListener('click', clearHistory);
 }
 
@@ -129,6 +112,7 @@ async function performDivination() {
     try {
         // 生成六爻
         const lines = generateHexagramLines();
+        console.log('生成的六爻:', lines);
         
         // 显示卦象
         displayHexagram(lines);
@@ -141,7 +125,17 @@ async function performDivination() {
         
     } catch (error) {
         console.error('占卜过程中出错:', error);
-        interpretationResult.innerHTML = '<div class="status-message status-error">解读过程中出现错误，请重试</div>';
+        interpretationResult.innerHTML = `
+            <div class="status-message status-error">
+                <h3>解读失败</h3>
+                <p>${error.message}</p>
+                <p>将使用基础解读</p>
+            </div>
+        `;
+        // 即使AI解读失败，也显示基础解读
+        const hexagramId = calculateHexagramId(lines);
+        const hexagram = hexagrams[hexagramId] || hexagrams[1];
+        useBasicInterpretation(hexagram, lines);
     } finally {
         // 恢复按钮状态
         setButtonLoadingState(false);
@@ -163,7 +157,7 @@ function setButtonLoadingState(loading) {
 function generateHexagramLines() {
     const lines = [];
     for (let i = 0; i < 6; i++) {
-        // 模拟投掷三枚硬币
+        // 模拟投掷三枚硬币（0=反面，1=正面）
         const coin1 = Math.floor(Math.random() * 2);
         const coin2 = Math.floor(Math.random() * 2);
         const coin3 = Math.floor(Math.random() * 2);
@@ -173,10 +167,10 @@ function generateHexagramLines() {
         
         // 转换为六爻数值（6,7,8,9）
         let lineValue;
-        if (sum === 0) lineValue = 6; // 老阴，变爻
-        else if (sum === 1) lineValue = 7; // 少阳
-        else if (sum === 2) lineValue = 8; // 少阴
-        else lineValue = 9; // 老阳，变爻
+        if (sum === 0) lineValue = 6; // 老阴，变爻 (3个反面)
+        else if (sum === 1) lineValue = 7; // 少阳 (1个正面)
+        else if (sum === 2) lineValue = 8; // 少阴 (2个正面)
+        else lineValue = 9; // 老阳，变爻 (3个正面)
         
         lines.push(lineValue);
     }
@@ -233,12 +227,19 @@ function displayHexagram(lines) {
     hexagramDisplay.appendChild(valuesText);
 }
 
-// 解读卦象
-// 解读卦象
+// 解读卦象 - 修复版本
 async function interpretHexagram(lines) {
-    // 基于实际生成的六爻计算卦象（而不是随机选择）
+    console.log('开始解读卦象，爻线:', lines);
+    
+    // 基于实际生成的六爻计算卦象
     const hexagramId = calculateHexagramId(lines);
     const hexagram = hexagrams[hexagramId] || hexagrams[1];
+    
+    console.log('计算得到的卦象:', {
+        id: hexagramId,
+        name: hexagram.name,
+        interpretation: hexagram.interpretation
+    });
     
     // 显示卦名
     const nameElement = document.createElement('div');
@@ -256,6 +257,10 @@ async function interpretHexagram(lines) {
         <p><strong>卦名：</strong>${hexagram.name}</p>
         <p><strong>卦序：</strong>第${hexagramId}卦</p>
         <p><strong>基础卦辞：</strong>${hexagram.interpretation}</p>
+        <p><strong>六爻详情：</strong>${lines.map((line, index) => {
+            const positions = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
+            return `${positions[index]}(${lineValues[line].type}${lineValues[line].changing ? '变' : ''})`;
+        }).join(' → ')}</p>
     `;
     interpretationResult.appendChild(basicInfo);
     
@@ -301,26 +306,143 @@ async function interpretWithDeepSeekAPI(hexagram, lines) {
         
         const errorMsg = document.createElement('div');
         errorMsg.className = 'status-message status-error';
-        errorMsg.textContent = `AI解读失败: ${error.message}，将使用基础解读`;
+        errorMsg.innerHTML = `
+            <h3>AI解读失败</h3>
+            <p>${error.message}</p>
+            <p>将使用基础解读</p>
+        `;
         interpretationResult.appendChild(errorMsg);
         
         // 回退到基础解读
         useBasicInterpretation(hexagram, lines);
     }
 }
+
+// 调用DeepSeek API - 修复版本
+async function callDeepSeekAPI(hexagram, lines) {
+    console.log('调用DeepSeek API...');
+    
+    if (!isApiConfigured()) {
+        throw new Error('API未配置');
+    }
+
+    const apiKey = getApiKey();
+    console.log('API调用详情:', {
+        keyLength: apiKey.length,
+        keyPreview: apiKey.substring(0, 8) + '...',
+        hexagram: hexagram.name
+    });
+
+    // 构建请求数据
+    const requestData = {
+        model: DEEPSEEK_CONFIG.modelConfig.model,
+        messages: [
+            {
+                role: "system",
+                content: `你是专业的易经六爻卜卦解读专家。请根据用户提供的卦象信息，用专业但通俗易懂的语言进行详细解读。解读应该积极正面，给出实用的建议和指导。请从整体运势、事业、感情、健康等多个方面进行分析。`
+            },
+            {
+                role: "user",
+                content: `请为我详细解读以下六爻卦象：
+
+卦名：${hexagram.name}
+卦序：第${calculateHexagramId(lines)}卦
+基础卦辞：${hexagram.interpretation}
+
+六爻构成（从下到上）：
+${lines.map((line, index) => {
+    const positions = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
+    const lineType = lineValues[line].type;
+    const isChanging = lineValues[line].changing;
+    return `${positions[index]}：${lineType}爻${isChanging ? '（变爻）' : ''}（数值${line}）`;
+}).join('\n')}
+
+请从以下方面进行详细解读：
+1. 整体运势和这个卦象的核心含义
+2. 对事业工作的具体启示和建议
+3. 对感情人际关系的指导
+4. 健康方面的注意事项
+5. 变爻的特殊含义（如果有变爻）
+6. 综合建议和行动指引
+
+请用温暖、专业、积极的语言进行解读，给出实用的建议。`
+            }
+        ],
+        temperature: DEEPSEEK_CONFIG.modelConfig.temperature,
+        max_tokens: DEEPSEEK_CONFIG.modelConfig.max_tokens,
+        stream: false
+    };
+
+    console.log('发送API请求...');
+    
+    const response = await fetch(DEEPSEEK_CONFIG.apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(requestData)
+    });
+
+    console.log('API响应状态:', response.status, response.statusText);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API错误详情:', errorText);
+        
+        if (response.status === 401) {
+            throw new Error('API密钥无效或已过期');
+        } else if (response.status === 429) {
+            throw new Error('API调用频率限制，请稍后重试');
+        } else {
+            throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
+        }
+    }
+
+    const data = await response.json();
+    console.log('API响应数据:', data);
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error('API返回数据格式错误');
+    }
+
+    return data.choices[0].message.content;
+}
+
 // 使用基础解读
 function useBasicInterpretation(hexagram, lines) {
     // 计算变爻数量
     const changingLines = lines.filter(line => line === 6 || line === 9).length;
     
     const sections = [
-        { title: "卦辞解读", content: hexagram.interpretation },
-        { title: "卦象分析", content: `本卦包含${changingLines}个变爻，${changingLines > 0 ? '预示变化较多，需要灵活应对' : '相对稳定，可按计划行事'}.` },
-        { title: "整体运势", content: getRandomInterpretation('overall') },
-        { title: "事业", content: getRandomInterpretation('career') },
-        { title: "感情", content: getRandomInterpretation('relationship') },
-        { title: "健康", content: getRandomInterpretation('health') },
-        { title: "建议", content: getRandomInterpretation('advice') }
+        { 
+            title: "卦辞解读", 
+            content: hexagram.interpretation 
+        },
+        { 
+            title: "卦象分析", 
+            content: `本卦包含 ${changingLines} 个变爻，${changingLines > 0 ? '预示变化较多，需要灵活应对' : '相对稳定，可按计划行事'}。` 
+        },
+        { 
+            title: "整体运势", 
+            content: getRandomInterpretation('overall') 
+        },
+        { 
+            title: "事业工作", 
+            content: getRandomInterpretation('career') 
+        },
+        { 
+            title: "感情人际", 
+            content: getRandomInterpretation('relationship') 
+        },
+        { 
+            title: "健康生活", 
+            content: getRandomInterpretation('health') 
+        },
+        { 
+            title: "行动建议", 
+            content: getRandomInterpretation('advice') 
+        }
     ];
     
     sections.forEach(section => {
@@ -343,39 +465,39 @@ function useBasicInterpretation(hexagram, lines) {
 function getRandomInterpretation(type) {
     const interpretations = {
         overall: [
-            "当前运势平稳，宜稳扎稳打",
-            "机遇与挑战并存，需要谨慎决策",
-            "运势上升，可积极进取",
-            "需要耐心等待时机成熟",
-            "变动较多，需灵活应对"
+            "当前运势平稳，宜稳扎稳打，积累实力",
+            "机遇与挑战并存，需要谨慎决策，把握时机",
+            "运势呈上升趋势，可积极进取，开拓新局面",
+            "需要耐心等待时机成熟，不宜贸然行动",
+            "变动因素较多，需要灵活应对，随机应变"
         ],
         career: [
-            "工作进展顺利，有望获得认可",
-            "面临新的挑战，需要提升能力",
-            "合作机会增多，宜加强沟通",
-            "需要明确目标，避免分散精力",
-            "有晋升机会，宜主动争取"
+            "工作进展顺利，踏实努力有望获得认可",
+            "面临新的挑战，需要提升专业能力应对",
+            "合作机会增多，宜加强沟通，建立良好关系",
+            "需要明确目标，集中精力，避免分散",
+            "有晋升发展机会，宜主动争取，展现能力"
         ],
         relationship: [
-            "感情稳定，关系和谐",
-            "需要更多沟通和理解",
-            "新的缘分可能出现",
-            "宜主动表达情感",
-            "关系面临考验，需要耐心经营"
+            "感情关系稳定和谐，宜用心经营",
+            "需要加强沟通理解，增进彼此了解",
+            "新的缘分可能出现，保持开放心态",
+            "宜主动表达情感，增进亲密关系",
+            "关系面临考验，需要耐心经营，相互支持"
         ],
         health: [
-            "身体状况良好，继续保持",
-            "需要注意休息，避免过度劳累",
-            "宜加强锻炼，提升体质",
-            "小病小痛需及时调理",
-            "精神状态佳，身心平衡"
+            "身体状况良好，继续保持健康生活习惯",
+            "需要注意劳逸结合，避免过度劳累",
+            "宜加强锻炼，提升身体素质",
+            "小病小痛需及时调理，防微杜渐",
+            "精神状态佳，保持身心平衡和谐"
         ],
         advice: [
-            "保持信心，坚持正道",
-            "多听取他人意见，避免独断",
-            "把握时机，果断行动",
-            "以柔克刚，避免正面冲突",
-            "厚积薄发，等待最佳时机"
+            "保持信心，坚持正道，自然会有好的结果",
+            "多听取他人意见，集思广益，避免独断",
+            "把握时机，果断行动，不要犹豫不决",
+            "以柔克刚，避免正面冲突，智慧应对",
+            "厚积薄发，耐心积累，等待最佳时机"
         ]
     };
     
@@ -385,14 +507,14 @@ function getRandomInterpretation(type) {
 
 // 保存到历史记录
 function saveToHistory(lines) {
-    // 计算卦象
     const hexagramId = calculateHexagramId(lines);
     const hexagram = hexagrams[hexagramId] || hexagrams[1];
     
     const record = {
         date: new Date().toLocaleString(),
-        lines: [...lines], // 复制数组
-        name: hexagram.name
+        lines: [...lines],
+        name: hexagram.name,
+        id: hexagramId
     };
     
     divinationHistory.unshift(record);
