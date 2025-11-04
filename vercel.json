@@ -16,11 +16,20 @@
       "dest": "/public/index.html"
     },
     {
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/public/js/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/public/$1"
     }
-  ],
-  "env": {
-    "DEEPSEEK_API_KEY": "@deepseek-api-key"
-  }
+  ]
 }
