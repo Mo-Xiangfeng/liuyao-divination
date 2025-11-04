@@ -1,0 +1,14 @@
+{
+  "name": "liuyao-divination",
+  "version": "1.0.0",
+  "description": "六爻卜卦网站 - 安全API版本",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@vercel/node": "^2.0.0"
+  },
+  "devDependencies": {
+    "vercel": "^28.0.0"
+  }
+}
