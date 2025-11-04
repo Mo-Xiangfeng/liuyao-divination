@@ -35,70 +35,67 @@ function bindEventListeners() {
 }
 
 // 改进的API测试函数
-async function testApiConnection() {
-  console.log('🔍 开始测试API连接...');
+async function testES6API() {
+  console.log('🧪 测试 ES6 模块 API...');
   
-  const apiUrl = '/api/interpret';
-  console.log('测试URL:', apiUrl);
-
-  try {
-    // 1. 首先测试GET请求
-    console.log('1. 测试GET请求...');
-    const getResponse = await fetch(apiUrl, {
-      method: 'GET'
-    });
-    
-    console.log('GET响应状态:', getResponse.status);
-    console.log('GET响应类型:', getResponse.headers.get('content-type'));
-    
-    const responseText = await getResponse.text();
-    console.log('GET响应内容:', responseText);
-    
-    // 尝试解析为JSON
-    try {
-      const jsonData = JSON.parse(responseText);
-      console.log('GET JSON解析成功:', jsonData);
-    } catch (e) {
-      console.log('GET响应不是JSON，可能是HTML页面');
-      throw new Error('API端点返回HTML而不是JSON，请检查路由配置');
-    }
-
-    // 2. 测试POST请求
-    console.log('2. 测试POST请求...');
-    const postResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        test: true,
-        message: '测试连接'
-      })
-    });
-    
-    console.log('POST响应状态:', postResponse.status);
-    const postText = await postResponse.text();
-    console.log('POST响应内容:', postText);
+  const endpoints = [
+    '/api/test',
+    '/api/interpret'
+  ];
+  
+  for (const endpoint of endpoints) {
+    console.log(`\n🔍 测试: ${endpoint}`);
     
     try {
-      const postData = JSON.parse(postText);
-      console.log('POST JSON解析成功:', postData);
-      return postData;
-    } catch (e) {
-      console.error('POST响应JSON解析失败:', e);
-      throw new Error('POST响应不是有效的JSON: ' + postText.substring(0, 100));
+      // 测试 GET
+      console.log('📨 发送 GET 请求...');
+      const getResponse = await fetch(endpoint);
+      const getText = await getResponse.text();
+      
+      console.log(`📊 状态: ${getResponse.status}`);
+      console.log(`📄 类型: ${getResponse.headers.get('content-type')}`);
+      
+      if (getResponse.ok) {
+        try {
+          const data = JSON.parse(getText);
+          console.log('✅ GET 成功:', data);
+        } catch (e) {
+          console.log('❌ GET 响应不是 JSON:', getText.substring(0, 100));
+        }
+      } else {
+        console.log('❌ GET 失败:', getText.substring(0, 100));
+      }
+      
+      // 测试 POST
+      console.log('📨 发送 POST 请求...');
+      const postResponse = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ test: true, message: '测试请求' })
+      });
+      const postText = await postResponse.text();
+      
+      console.log(`📊 状态: ${postResponse.status}`);
+      
+      if (postResponse.ok) {
+        try {
+          const data = JSON.parse(postText);
+          console.log('✅ POST 成功:', data);
+        } catch (e) {
+          console.log('❌ POST 响应不是 JSON:', postText.substring(0, 100));
+        }
+      } else {
+        console.log('❌ POST 失败:', postText.substring(0, 100));
+      }
+      
+    } catch (error) {
+      console.log('💥 请求异常:', error.message);
     }
-    
-  } catch (error) {
-    console.error('❌ API测试失败:', error);
-    throw error;
   }
 }
 
 // 运行测试
-testApiConnection()
-  .then(result => console.log('🎉 API测试成功:', result))
-  .catch(error => console.error('💥 API测试失败:', error.message));
+testES6API();
 
 // 执行占卜函数
 async function performDivination() {
