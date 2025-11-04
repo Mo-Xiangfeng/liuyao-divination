@@ -35,6 +35,47 @@ function bindEventListeners() {
 }
 
 // 改进的API测试函数
+// 添加到 app.js 中
+async function diagnoseAPIIssue() {
+  console.log('🔧 诊断API问题...');
+  console.log('当前URL:', window.location.href);
+  
+  const endpoints = [
+    '/api/test',      // 先测试这个简单的
+    '/api/interpret'  // 再测试主要的
+  ];
+  
+  for (const endpoint of endpoints) {
+    console.log(`\n=== 测试 ${endpoint} ===`);
+    
+    try {
+      // 方法1: 直接访问（在浏览器地址栏测试）
+      console.log(`请在浏览器中访问: ${window.location.origin}${endpoint}`);
+      
+      // 方法2: 用 fetch 测试
+      const response = await fetch(endpoint);
+      console.log('状态:', response.status);
+      console.log('状态文本:', response.statusText);
+      
+      const text = await response.text();
+      console.log('响应内容:', text);
+      
+      if (response.status === 404) {
+        console.log('❌ 404错误 - API路由不存在');
+        console.log('可能的原因:');
+        console.log('1. API文件不在正确位置');
+        console.log('2. Vercel配置错误');
+        console.log('3. 文件扩展名问题');
+      }
+      
+    } catch (error) {
+      console.log('💥 请求失败:', error.message);
+    }
+  }
+}
+
+// 运行诊断
+diagnoseAPIIssue();
 async function testES6API() {
   console.log('🧪 测试 ES6 模块 API...');
   
