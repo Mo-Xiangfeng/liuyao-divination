@@ -1,14 +1,16 @@
 {
   "name": "liuyao-divination",
   "version": "1.0.0",
-  "description": "六爻卜卦网站 - 安全API版本",
+  "description": "六爻卜卦网站 - Vercel部署版本",
+  "type": "module",
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "vercel dev",
+    "build": "echo 'No build step needed for static site'"
   },
   "dependencies": {
     "@vercel/node": "^2.0.0"
   },
-  "devDependencies": {
-    "vercel": "^28.0.0"
+  "engines": {
+    "node": ">=18"
   }
 }
