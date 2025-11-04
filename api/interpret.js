@@ -1,73 +1,111 @@
 // api/interpret.js
-export default async function handler(request, response) {
-  // 设置CORS头
-  response.setHeader('Access-Control-Allow-Credentials', true);
-  response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  response.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+export default async function handler(req, res) {
+  // 设置CORS头 - 简化版本
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // 处理预检请求
-  if (request.method === 'OPTIONS') {
-    response.status(200).end();
-    return;
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
 
-  // 只允许POST请求
-  if (request.method !== 'POST') {
-    return response.status(405).json({ error: 'Method not allowed' });
+  // 添加健康检查端点（GET请求）
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      status: 'API服务正常运行',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      hasApiKey: !!process.env.DEEPSEEK_API_KEY
+    });
   }
 
-  try {
-    const { test, hexagram, lines, lineDetails } = request.body;
+  // 处理POST请求
+  if (req.method === 'POST') {
+    try {
+      // 解析请求体
+      let body;
+      try {
+        body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      } catch (parseError) {
+        return res.status(400).json({
+          error: '请求体格式错误',
+          details: parseError.message
+        });
+      }
 
-    // 测试连接
-    if (test) {
-      return response.status(200).json({
-        message: '后端API连接正常',
+      const { test, hexagram, lines, lineDetails } = body;
+
+      // 测试连接
+      if (test) {
+        return res.status(200).json({
+          message: '后端API连接正常',
+          timestamp: new Date().toISOString(),
+          environment: process.env.NODE_ENV || 'development',
+          hasApiKey: !!process.env.DEEPSEEK_API_KEY
+        });
+      }
+
+      // 验证必要参数
+      if (!hexagram || !lines) {
+        return res.status(400).json({
+          error: '缺少必要参数',
+          required: ['hexagram', 'lines'],
+          received: {
+            hexagram: !!hexagram,
+            lines: !!lines
+          }
+        });
+      }
+
+      console.log('收到卦象解读请求:', {
+        hexagram: hexagram.name,
+        lines: lines,
+        environment: process.env.NODE_ENV
+      });
+
+      // 调用DeepSeek API
+      const interpretation = await callDeepSeekAPI(hexagram, lines, lineDetails);
+
+      // 返回解读结果
+      return res.status(200).json({
+        interpretation: interpretation,
+        hexagram: hexagram,
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development'
+        success: true
       });
-    }
 
-    // 验证必要参数
-    if (!hexagram || !lines) {
-      return response.status(400).json({
-        error: '缺少必要参数: hexagram 和 lines'
-      });
-    }
-
-    console.log('收到卦象解读请求:', {
-      hexagram: hexagram.name,
-      lines: lines
-    });
-
-    // 调用DeepSeek API
-    const interpretation = await callDeepSeekAPI(hexagram, lines, lineDetails);
-
-    // 返回解读结果
-    response.status(200).json({
-      interpretation: interpretation,
-      hexagram: hexagram,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('API处理错误:', error);
-    
-    if (error.message.includes('API密钥') || error.message.includes('401')) {
-      return response.status(401).json({
-        error: 'API密钥配置错误: ' + error.message
-      });
-    } else if (error.message.includes('频率限制') || error.message.includes('429')) {
-      return response.status(429).json({
-        error: 'API调用频率限制: ' + error.message
-      });
-    } else {
-      return response.status(500).json({
-        error: '服务器内部错误: ' + error.message
-      });
+    } catch (error) {
+      console.error('API处理错误:', error);
+      
+      // 提供更详细的错误信息
+      if (error.message.includes('API密钥') || error.message.includes('401')) {
+        return res.status(401).json({
+          error: 'API密钥配置错误',
+          details: error.message,
+          suggestion: '请检查Vercel环境变量中的DEEPSEEK_API_KEY配置'
+        });
+      } else if (error.message.includes('频率限制') || error.message.includes('429')) {
+        return res.status(429).json({
+          error: 'API调用频率限制',
+          details: error.message,
+          suggestion: '请稍后重试或检查API配额'
+        });
+      } else {
+        return res.status(500).json({
+          error: '服务器内部错误',
+          details: error.message,
+          suggestion: '请检查服务器日志或联系管理员'
+        });
+      }
     }
   }
+
+  // 其他不允许的请求方法
+  return res.status(405).json({ 
+    error: '方法不允许',
+    allowed: ['GET', 'POST', 'OPTIONS']
+  });
 }
 
 // 调用DeepSeek API
@@ -75,7 +113,8 @@ async function callDeepSeekAPI(hexagram, lines, lineDetails) {
   const apiKey = process.env.DEEPSEEK_API_KEY;
   
   if (!apiKey) {
-    throw new Error('DeepSeek API密钥未配置');
+    console.error('DeepSeek API密钥未配置');
+    throw new Error('DeepSeek API密钥未配置 - 请在Vercel环境变量中设置DEEPSEEK_API_KEY');
   }
 
   const apiUrl = 'https://api.deepseek.com/chat/completions';
@@ -129,35 +168,58 @@ ${lineDetails ? lineDetails.map((line, index) =>
     stream: false
   };
 
-  console.log('调用DeepSeek API...');
-
-  const apiResponse = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify(requestBody)
+  console.log('调用DeepSeek API...', {
+    model: requestBody.model,
+    hexagram: hexagram.name
   });
 
-  if (!apiResponse.ok) {
-    const errorText = await apiResponse.text();
-    console.error('DeepSeek API错误:', apiResponse.status, errorText);
-    
-    if (apiResponse.status === 401) {
-      throw new Error('DeepSeek API密钥无效或已过期');
-    } else if (apiResponse.status === 429) {
-      throw new Error('DeepSeek API调用频率限制');
-    } else {
-      throw new Error(`DeepSeek API请求失败: ${apiResponse.status} ${apiResponse.statusText}`);
+  try {
+    const apiResponse = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!apiResponse.ok) {
+      let errorText;
+      try {
+        errorText = await apiResponse.text();
+      } catch {
+        errorText = '无法读取错误响应';
+      }
+      
+      console.error('DeepSeek API错误:', {
+        status: apiResponse.status,
+        statusText: apiResponse.statusText,
+        error: errorText
+      });
+      
+      if (apiResponse.status === 401) {
+        throw new Error('DeepSeek API密钥无效或已过期');
+      } else if (apiResponse.status === 429) {
+        throw new Error('DeepSeek API调用频率限制，请稍后重试');
+      } else if (apiResponse.status >= 500) {
+        throw new Error('DeepSeek API服务器错误，请稍后重试');
+      } else {
+        throw new Error(`DeepSeek API请求失败: ${apiResponse.status} ${apiResponse.statusText}`);
+      }
     }
-  }
 
-  const data = await apiResponse.json();
-  
-  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-    throw new Error('DeepSeek API返回数据格式错误');
-  }
+    const data = await apiResponse.json();
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('DeepSeek API返回数据格式异常:', data);
+      throw new Error('DeepSeek API返回数据格式错误');
+    }
 
-  return data.choices[0].message.content;
+    console.log('DeepSeek API调用成功');
+    return data.choices[0].message.content;
+    
+  } catch (error) {
+    console.error('DeepSeek API调用异常:', error);
+    throw error;
+  }
 }
