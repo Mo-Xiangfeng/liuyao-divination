@@ -34,45 +34,71 @@ function bindEventListeners() {
     testBtn.addEventListener('click', testApiConnection);
 }
 
-// 测试API连接
+// 改进的API测试函数
 async function testApiConnection() {
-    console.log('测试API连接...');
+  console.log('🔍 开始测试API连接...');
+  
+  const apiUrl = '/api/interpret';
+  console.log('测试URL:', apiUrl);
+
+  try {
+    // 1. 首先测试GET请求
+    console.log('1. 测试GET请求...');
+    const getResponse = await fetch(apiUrl, {
+      method: 'GET'
+    });
     
-    const statusMsg = document.createElement('div');
-    statusMsg.className = 'status-message status-info';
-    statusMsg.innerHTML = '<div class="loading"></div>测试API连接中...';
-    interpretationResult.innerHTML = '';
-    interpretationResult.appendChild(statusMsg);
+    console.log('GET响应状态:', getResponse.status);
+    console.log('GET响应类型:', getResponse.headers.get('content-type'));
+    
+    const responseText = await getResponse.text();
+    console.log('GET响应内容:', responseText);
+    
+    // 尝试解析为JSON
+    try {
+      const jsonData = JSON.parse(responseText);
+      console.log('GET JSON解析成功:', jsonData);
+    } catch (e) {
+      console.log('GET响应不是JSON，可能是HTML页面');
+      throw new Error('API端点返回HTML而不是JSON，请检查路由配置');
+    }
+
+    // 2. 测试POST请求
+    console.log('2. 测试POST请求...');
+    const postResponse = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        test: true,
+        message: '测试连接'
+      })
+    });
+    
+    console.log('POST响应状态:', postResponse.status);
+    const postText = await postResponse.text();
+    console.log('POST响应内容:', postText);
     
     try {
-        const response = await fetch(API_CONFIG.baseUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                test: true,
-                message: "测试连接"
-            })
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            statusMsg.className = 'status-message status-success';
-            statusMsg.innerHTML = `✅ API连接成功！<br>服务状态: ${data.message}`;
-            console.log('API测试成功:', data);
-        } else {
-            const errorData = await response.json();
-            statusMsg.className = 'status-message status-error';
-            statusMsg.innerHTML = `❌ API连接失败: ${response.status}<br>${errorData.error || '请检查服务器配置'}`;
-            console.error('API测试失败:', response.status, errorData);
-        }
-    } catch (error) {
-        statusMsg.className = 'status-message status-error';
-        statusMsg.innerHTML = `❌ 网络连接失败: ${error.message}`;
-        console.error('API测试异常:', error);
+      const postData = JSON.parse(postText);
+      console.log('POST JSON解析成功:', postData);
+      return postData;
+    } catch (e) {
+      console.error('POST响应JSON解析失败:', e);
+      throw new Error('POST响应不是有效的JSON: ' + postText.substring(0, 100));
     }
+    
+  } catch (error) {
+    console.error('❌ API测试失败:', error);
+    throw error;
+  }
 }
+
+// 运行测试
+testApiConnection()
+  .then(result => console.log('🎉 API测试成功:', result))
+  .catch(error => console.error('💥 API测试失败:', error.message));
 
 // 执行占卜函数
 async function performDivination() {
