@@ -2,7 +2,7 @@
 
 一个基于易经六爻的在线占卜网站，集成DeepSeek AI智能解读功能。
 
-## 通过Netlify部署，DeepSeek密钥请自行配置
+## 通过Vercel部署，DeepSeek密钥请自行配置
 
 ## 功能特点
 
