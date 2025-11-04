@@ -1,14 +1,10 @@
-export async function askDeepSeek(prompt) {
-  const res = await fetch("/api/chat", {
+async function askDeepSeek(question) {
+  const res = await fetch("/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "deepseek-chat",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      max_tokens: 1500
-    })
+    body: JSON.stringify({ question })
   });
+
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || "（无响应）";
+  return data.choices?.[0]?.message?.content || "AI 暂时无法解读。";
 }
