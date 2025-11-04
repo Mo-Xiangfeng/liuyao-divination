@@ -298,6 +298,7 @@ async function interpretWithBackendAPI(hexagram, lines) {
 }
 
 // 调用后端API
+// 调用后端API - 修复版本
 async function callBackendAPI(hexagram, lines) {
     console.log('调用后端API...');
     
@@ -323,39 +324,57 @@ async function callBackendAPI(hexagram, lines) {
 
     console.log('发送API请求:', requestData);
     
-    const response = await fetch(API_CONFIG.baseUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-    });
+    try {
+        const response = await fetch('/api/interpret', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+            // 添加超时设置
+            signal: AbortSignal.timeout(30000) // 30秒超时
+        });
 
-    console.log('API响应状态:', response.status, response.statusText);
+        console.log('API响应状态:', response.status, response.statusText);
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API错误详情:', errorData);
-        
-        if (response.status === 401) {
-            throw new Error('API密钥配置错误');
-        } else if (response.status === 429) {
-            throw new Error('API调用频率限制，请稍后重试');
-        } else if (response.status === 500) {
-            throw new Error('服务器内部错误，请稍后重试');
-        } else {
-            throw new Error(`API请求失败: ${response.status} ${errorData.error || response.statusText}`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('API错误详情:', errorData);
+            
+            if (response.status === 401) {
+                throw new Error('API密钥配置错误');
+            } else if (response.status === 429) {
+                throw new Error('API调用频率限制，请稍后重试');
+            } else if (response.status === 500) {
+                throw new Error('服务器内部错误，请稍后重试');
+            } else {
+                throw new Error(`API请求失败: ${response.status} ${errorData.error || response.statusText}`);
+            }
         }
+
+        const data = await response.json();
+        console.log('API响应数据:', data);
+
+        if (!data.interpretation) {
+            throw new Error('API返回数据格式错误');
+        }
+
+        return data.interpretation;
+
+    } catch (error) {
+        console.error('API调用异常:', error);
+        
+        // 如果是网络错误，提供更友好的提示
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            throw new Error('网络连接失败，请检查网络连接或禁用浏览器扩展后重试');
+        }
+        
+        if (error.name === 'AbortError') {
+            throw new Error('请求超时，请检查网络连接后重试');
+        }
+        
+        throw error;
     }
-
-    const data = await response.json();
-    console.log('API响应数据:', data);
-
-    if (!data.interpretation) {
-        throw new Error('API返回数据格式错误');
-    }
-
-    return data.interpretation;
 }
 
 // 使用基础解读
