@@ -1,55 +1,58 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>六爻卜卦 - 智能易经占卜</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六爻卜卦 - 智能易经占卜</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>六爻卜卦</h1>
-      <p class="subtitle">智能易经占卜 - 集成AI智能解读</p>
-    </header>
-    
-    <div class="main-content">
-      <section class="divination-section">
-        <h2>开始占卜</h2>
-        <p>静心凝神，专注于您要询问的问题，然后点击“开始占卜”按钮。</p>
-
-        <div class="button-group">
-          <button id="startBtn" class="primary-btn"><span class="btn-text">开始占卜</span></button>
-          <button id="clearBtn" class="secondary-btn">清除记录</button>
+    <div class="container">
+        <header>
+            <h1>六爻卜卦</h1>
+            <p class="subtitle">智能易经占卜 - 安全API版本</p>
+        </header>
+        
+        <div class="main-content">
+            <section class="divination-section">
+                <h2>开始占卜</h2>
+                <p>静心凝神，专注于您要询问的问题，然后点击"开始占卜"按钮。</p>
+                
+                <div class="button-group">
+                    <button id="startBtn" class="primary-btn">
+                        <span class="btn-text">开始占卜</span>
+                    </button>
+                    <button id="clearBtn" class="secondary-btn">清除记录</button>
+                    <button id="testBtn" class="secondary-btn">测试连接</button>
+                </div>
+                
+                <div class="hexagram-container" id="hexagramDisplay">
+                    <p>点击"开始占卜"生成卦象</p>
+                </div>
+                
+                <div class="history-section">
+                    <h3>占卜历史</h3>
+                    <div id="historyList">
+                        <!-- 历史记录将在这里显示 -->
+                    </div>
+                </div>
+            </section>
+            
+            <section class="result-section">
+                <h2>卦象解读</h2>
+                <div id="interpretationResult">
+                    <p>卦象生成后将显示详细解读</p>
+                </div>
+            </section>
         </div>
-
-        <div class="hexagram-container" id="hexagramDisplay">
-          <p>点击“开始占卜”生成卦象</p>
-        </div>
-
-        <div class="history-section">
-          <h3>占卜历史</h3>
-          <div id="historyList"></div>
-        </div>
-      </section>
-
-      <section class="result-section">
-        <h2>卦象解读</h2>
-        <div id="interpretationResult">
-          <p>卦象生成后将显示详细解读</p>
-        </div>
-      </section>
+        
+        <footer>
+            <p>六爻卜卦 - 本工具仅供娱乐参考，人生之路还需自己把握</p>
+            <p>© 2023 六爻卜卦 | Vercel安全部署版本</p>
+        </footer>
     </div>
 
-    <footer>
-      <p>六爻卜卦 - 本工具仅供娱乐参考，人生之路还需自己把握</p>
-      <p>© 2025 六爻卜卦 | 集成AI智能解读</p>
-    </footer>
-  </div>
-
-  <script src="js/hexagrams.js"></script>
-  <script src="js/deepseek-api.js"></script>
-  <script src="js/app.js"></script>
+    <script src="/js/hexagrams.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 </html>
-vvvv
