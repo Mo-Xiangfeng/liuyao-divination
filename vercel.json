@@ -25,10 +25,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/$1",
-      "headers": {
-        "Content-Type": "text/html"
-      }
+      "dest": "/$1"
     }
   ]
 }
